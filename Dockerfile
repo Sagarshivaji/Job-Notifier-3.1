@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:22-alpine
 # Cache bust: postgres-migration-v2
 
 # Set working directory
