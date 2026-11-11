@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Job Pulse Backend",
+      "type": "shell",
+      "command": "Set-Location 'c:\\Users\\Sagar\\.gemini\\antigravity\\scratch\\job-notifier\\backend'; npm start",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "Start Job Pulse Frontend",
+      "type": "shell",
+      "command": "Set-Location 'c:\\Users\\Sagar\\.gemini\\antigravity\\scratch\\job-notifier\\frontend'; npm run dev -- --host 0.0.0.0",
+      "isBackground": true,
+      "problemMatcher": [],
+      "group": "build"
+    }
+  ]
+}

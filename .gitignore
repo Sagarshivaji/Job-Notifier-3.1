@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+.vite/
+.env
+.env.local
+.env.*.local
+!.env.example
+*.log
+.DS_Store
+coverage/
+.vercel
+browser-extension.zip

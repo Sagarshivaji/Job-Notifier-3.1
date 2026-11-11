@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job Notifier</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 340px;
+      min-height: 200px;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .logo {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .header-text h1 { font-size: 13px; font-weight: 700; color: #f1f5f9; letter-spacing: 0.3px; }
+    .header-text p  { font-size: 10px; color: #64748b; margin-top: 1px; }
+
+    /* ── Auto-import status pill ── */
+    .auto-status {
+      margin: 10px 16px 0;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 10.5px;
+      line-height: 1.5;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .auto-status.active   { background: #052e16; color: #86efac; border: 1px solid #166534; }
+    .auto-status.inactive { background: #1c1917; color: #a8a29e; border: 1px solid #44403c; }
+
+    .auto-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .auto-dot.active   { background: #22c55e; box-shadow: 0 0 6px #22c55e88; animation: pulse 2s infinite; }
+    .auto-dot.inactive { background: #78716c; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.45; }
+    }
+
+    /* ── Body ── */
+    .body { padding: 12px 16px 14px; }
+
+    /* Site badge */
+    .site-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .site-badge.indeed    { background: #1a2742; color: #60a5fa; border: 1px solid #1d4ed8; }
+    .site-badge.naukri    { background: #1a2a1a; color: #4ade80; border: 1px solid #166534; }
+    .site-badge.linkedin  { background: #1a2035; color: #818cf8; border: 1px solid #3730a3; }
+    .site-badge.glassdoor { background: #2a1f14; color: #fb923c; border: 1px solid #9a3412; }
+    .site-badge.unknown   { background: #1e1e2e; color: #94a3b8; border: 1px solid #334155; }
+
+    /* Jobs found counter */
+    .count-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .count-label { font-size: 12px; color: #94a3b8; }
+    .count-value {
+      font-size: 22px; font-weight: 800;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* Settings */
+    .settings-section { margin-bottom: 8px; }
+    .input-label {
+      display: block; font-size: 10px;
+      color: #64748b; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 7px 10px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 7px;
+      color: #e2e8f0;
+      font-size: 12px;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+    input[type="text"]:focus, input[type="password"]:focus { border-color: #6366f1; }
+
+    /* Buttons */
+    .btn {
+      width: 100%; padding: 9px;
+      border-radius: 8px; border: none;
+      font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      letter-spacing: 0.3px;
+    }
+    .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(99,102,241,0.4); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-save { background: linear-gradient(135deg, #059669, #10b981); color: #fff; }
+    .btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(16,185,129,0.35); }
+    .btn-secondary { background: #1e293b; color: #94a3b8; border: 1px solid #334155; margin-top: 6px; font-size: 11px; }
+    .btn-secondary:hover { border-color: #6366f1; color: #e2e8f0; }
+
+    /* Button row: Save + Send side-by-side */
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 2px; }
+    .btn-row .btn { font-size: 11px; }
+
+    /* Status message */
+    .status { margin-top: 8px; padding: 8px 10px; border-radius: 7px; font-size: 11px; line-height: 1.45; display: none; }
+    .status.success { background: #14532d; color: #86efac; display: block; }
+    .status.error   { background: #450a0a; color: #fca5a5; display: block; }
+    .status.info    { background: #1e293b; color: #94a3b8; display: block; }
+
+    /* Unsupported page */
+    .unsupported { padding: 20px 16px; text-align: center; color: #475569; font-size: 12px; line-height: 1.6; }
+    .unsupported .emoji { font-size: 28px; margin-bottom: 8px; }
+    .unsupported .site-links { margin-top: 10px; display: flex; gap: 6px; justify-content: center; }
+    .unsupported .site-link {
+      padding: 4px 10px; border-radius: 16px; font-size: 10.5px; font-weight: 600;
+      text-decoration: none; cursor: pointer; border: none;
+    }
+    .sl-indeed    { background: #1a2742; color: #60a5fa; }
+    .sl-naukri    { background: #1a2a1a; color: #4ade80; }
+    .sl-linkedin  { background: #1a2035; color: #818cf8; }
+    .sl-glassdoor { background: #2a1f14; color: #fb923c; }
+
+    /* Divider */
+    .divider { height: 1px; background: #1e293b; margin: 10px 0; }
+
+    /* Job preview list */
+    .preview-list { max-height: 110px; overflow-y: auto; margin-bottom: 8px; }
+    .preview-list::-webkit-scrollbar { width: 3px; }
+    .preview-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+    .preview-item { padding: 5px 0; border-bottom: 1px solid #1e293b; font-size: 11px; }
+    .preview-item .ji-title { color: #c7d2fe; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .preview-item .ji-company { color: #64748b; font-size: 10px; }
+
+    /* Section heading */
+    .section-heading { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #475569; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">🔔</div>
+    <div class="header-text">
+      <h1>Job Notifier</h1>
+      <p>Browser Job Reader</p>
+    </div>
+  </div>
+
+  <!-- Auto-import status pill (always visible) -->
+  <div id="auto-status" class="auto-status inactive">
+    <span class="auto-dot inactive"></span>
+    Auto-import <strong>OFF</strong> — save credentials to enable
+  </div>
+
+  <!-- Unsupported page message -->
+  <div id="unsupported" class="unsupported" style="display:none;">
+    <div class="emoji">🌐</div>
+    <p>Navigate to a job site to start auto-importing listings.</p>
+    <div class="site-links">
+      <a class="site-link sl-naukri"  href="https://www.naukri.com/jobs-in-india"   target="_blank">🟢 Naukri</a>
+      <a class="site-link sl-indeed"  href="https://www.indeed.com/jobs"             target="_blank">🔵 Indeed</a>
+      <a class="site-link sl-linkedin" href="https://www.linkedin.com/jobs"          target="_blank">🟣 LinkedIn</a>
+      <a class="site-link sl-glassdoor" href="https://www.glassdoor.co.in/Job"       target="_blank">🟠 Glassdoor</a>
+    </div>
+  </div>
+
+  <!-- Main content (shown on supported job sites) -->
+  <div id="main-content" class="body" style="display:none;">
+    <div id="site-badge" class="site-badge unknown">⚙ Loading...</div>
+
+    <div class="count-row">
+      <span class="count-label">Jobs detected on page</span>
+      <span class="count-value" id="job-count">0</span>
+    </div>
+
+    <div class="preview-list" id="preview-list"></div>
+
+    <div class="divider"></div>
+
+    <div class="section-heading">⚙️ Backend Settings (save once)</div>
+
+    <div class="settings-section">
+      <label class="input-label" for="backend-url">Backend URL</label>
+      <input type="text" id="backend-url" placeholder="https://your-app.onrender.com" />
+    </div>
+
+    <div class="settings-section">
+      <label class="input-label" for="auth-token">Auth Token <span style="color:#475569;">(from dashboard login)</span></label>
+      <input type="password" id="auth-token" placeholder="Paste your JWT token here" />
+    </div>
+
+    <!-- Save + Send side by side -->
+    <div class="btn-row">
+      <button class="btn btn-save" id="save-btn">💾 Save Settings</button>
+      <button class="btn btn-primary" id="send-btn" disabled>⚡ Send Now</button>
+    </div>
+
+    <button class="btn btn-secondary" id="refresh-btn">🔄 Re-scan Page</button>
+
+    <div class="status" id="status-msg"></div>
+  </div>
+
+  <!-- Credentials section shown on unsupported pages too -->
+  <div id="unsupported-settings" style="padding: 0 16px 14px; display:none;">
+    <div class="divider" style="margin-top:0;"></div>
+    <div class="section-heading">⚙️ Backend Settings</div>
+    <div class="settings-section">
+      <label class="input-label" for="backend-url-alt">Backend URL</label>
+      <input type="text" id="backend-url-alt" placeholder="https://your-app.onrender.com" />
+    </div>
+    <div class="settings-section">
+      <label class="input-label" for="auth-token-alt">Auth Token</label>
+      <input type="password" id="auth-token-alt" placeholder="Paste your JWT token here" />
+    </div>
+    <button class="btn btn-save" id="save-btn-alt" style="width:100%;">💾 Save Settings</button>
+    <div class="status" id="status-msg-alt"></div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
