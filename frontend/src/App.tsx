@@ -57,7 +57,6 @@ export default function App() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'claude' | 'saved' | 'applied' | 'interviewing'>(() => 
     (localStorage.getItem('jp_status_filter') || 'all') as any
   );
-  const [logFilterTab, setLogFilterTab] = useState<'all' | 'claude' | 'sync' | 'errors'>('all');
   const [dateFilter, setDateFilter] = useState<'all' | '24h' | '3d' | '7d' | '14d'>(() => 
     (localStorage.getItem('jp_date_filter') || 'all') as any
   );
